@@ -34,7 +34,7 @@ namespace Burguers.Askxammy.Api.Controllers
             }
             else
             {
-                return Ok();
+                return NoContent();
             }
         }
 
@@ -90,6 +90,23 @@ namespace Burguers.Askxammy.Api.Controllers
             {
                 return BadRequest("Id de usuario invalido");
             }
+        }
+
+        [HttpGet("{id}/dishes")]
+        public IActionResult GetDishesByClient(int id)
+        {
+            if (id > 0)
+            {
+                var client = _unitOfWork.clients.GetById(id);
+                if (client != null)
+                {
+                    return Ok(client.Dish);
+                }
+                else
+                    return BadRequest("El cliente solicitado no existe");
+            }
+            else
+                return BadRequest("El id del restaurante debe ser mayor a 0");
         }
     }
 }
