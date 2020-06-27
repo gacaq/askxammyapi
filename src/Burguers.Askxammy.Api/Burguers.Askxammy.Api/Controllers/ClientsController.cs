@@ -23,6 +23,10 @@ namespace Burguers.Askxammy.Api.Controllers
             this._unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Metodo que obtiene la lista de clientes
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GetClients()
         {
@@ -38,6 +42,12 @@ namespace Burguers.Askxammy.Api.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Obtiene los clientes de a cuerdo al parametro solicitado
+        /// </summary>
+        /// <param name="id">Id de cliente solicitado</param>
+        /// <returns></returns>
         [HttpGet("id")]
         public IActionResult GetById(int id)
         {
