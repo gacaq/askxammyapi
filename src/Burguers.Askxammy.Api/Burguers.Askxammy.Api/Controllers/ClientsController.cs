@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Burguers.Askxammy.Api.Data;
+using Burguers.Askxammy.Api.Entities.Dtos;
 using Burguers.Askxammy.Api.Entities.Models;
 using Burguers.Askxammy.Api.Services;
 using Microsoft.AspNetCore.Http;
@@ -30,15 +31,23 @@ namespace Burguers.Askxammy.Api.Controllers
         [HttpGet]
         public IActionResult GetClients()
         {
-            var clients = this._unitOfWork.clients.Get();
+            try
+            {
+                var clients = this._unitOfWork.clients.Get();
 
-            if (clients.Any())
-            {
-                return Ok(clients);
+                if (clients.Any())
+                {
+                    var dtos = clients.Select(x => ClientToDto(x)).ToList();
+                    return Ok(dtos);
+                }
+                else
+                {
+                    return NoContent();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return NoContent();
+                return StatusCode(500, ex);
             }
         }
 
@@ -51,28 +60,60 @@ namespace Burguers.Askxammy.Api.Controllers
         [HttpGet("id")]
         public IActionResult GetById(int id)
         {
-            var client = this._unitOfWork.clients.GetById(id);
+            try
+            {
 
-            if(client != null)
-            {
-                return Ok(client);
+                var client = this._unitOfWork.clients.GetById(id);
+
+                if (client != null)
+                {
+                    return Ok(ClientToDto(client));
+                }
+                else
+                {
+                    return NoContent();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return NoContent();
+                return StatusCode(500, ex);
             }
         }
 
         [HttpPut]
-        public IActionResult Update([FromBody] Client client)
+        public IActionResult Update([FromBody] ClientDto dto)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
+                    var client = DtoToClient(dto);
                     _unitOfWork.clients.Update(client);
                     _unitOfWork.Save();
                     return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Save([FromBody] ClientDto dto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var client = DtoToClient(dto);
+                    _unitOfWork.clients.Insert(client);
+                    _unitOfWork.Save();
+                    return Created("AskxammiApi/SaveDish", client);
                 }
                 else
                 {
@@ -117,6 +158,35 @@ namespace Burguers.Askxammy.Api.Controllers
             }
             else
                 return BadRequest("El id del restaurante debe ser mayor a 0");
+        }
+
+
+        private Client DtoToClient(ClientDto dto)
+        {
+            return new Client()
+            {
+                Id = dto.Id,
+                Address = dto.Address,
+                Name = dto.Name,
+                Username = dto.Username,
+                Password = dto.Password,
+                PhoneNumber = dto.PhoneNumber,
+                Role = dto.Role
+            };
+        }
+
+        private ClientDto ClientToDto(Client client)
+        {
+            return new ClientDto()
+            {
+                Id = client.Id,
+                Address = client.Address,
+                Name = client.Name,
+                Username = client.Username,
+                Password = client.Password,
+                PhoneNumber = client.PhoneNumber,
+                Role = client.Role
+            };
         }
     }
 }

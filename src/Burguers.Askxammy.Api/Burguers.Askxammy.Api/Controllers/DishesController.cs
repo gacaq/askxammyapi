@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Burguers.Askxammy.Api.Data;
+using Burguers.Askxammy.Api.Entities.Dtos;
+using Burguers.Askxammy.Api.Entities.Models;
 using Burguers.Askxammy.Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,18 +24,31 @@ namespace Burguers.Askxammy.Api.Controllers
             this._unitOfWork = unitOfWork;
         }
 
+
+        /// <summary>
+        /// Obtiene la lista de todos los platos disponibles
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GetDishes()
         {
-            var dishes = this._unitOfWork.dishes.Get();
+            try
+            {
+                var dishes = this._unitOfWork.dishes.Get();
 
-            if (dishes.Any())
-            {
-                return Ok(dishes);
+                if (dishes.Any())
+                {
+                    var dtoList = dishes.Select(x => DishToDto(x)).ToList();
+                    return Ok(dtoList);
+                }
+                else
+                {
+                    return NoContent();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return NoContent();
+                return StatusCode(500, ex);
             }
         }
 
@@ -55,6 +70,80 @@ namespace Burguers.Askxammy.Api.Controllers
             }
             else
                 return BadRequest("El id debe ser mayor a cero");
+        }
+
+        [HttpPost]
+        public IActionResult SaveDish([FromBody] DishDto dto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var dish = DtoToDish(dto);
+                    _unitOfWork.dishes.Insert(dish);
+                    _unitOfWork.Save();
+                    return Created("AskxammiApi/SaveDish", dish);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut]
+        public IActionResult UpdateDish([FromBody] DishDto dto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var dish = DtoToDish(dto);
+                    _unitOfWork.dishes.Update(dish);
+                    _unitOfWork.Save();
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        private DishDto DishToDto(Dish dish)
+        {
+            return new DishDto()
+            {
+                Id = dish.Id,
+                ClientId = dish.ClientId,
+                Description = dish.Description,
+                Name = dish.Name,
+                Price = dish.Price,
+                Rate = dish.Rate,
+                Type = dish.Type
+            };
+        }
+
+        private Dish DtoToDish(DishDto dto)
+        {
+            return new Dish()
+            {
+                Id = dto.Id,
+                ClientId = dto.ClientId,
+                Description = dto.Description,
+                Name = dto.Name,
+                Price = dto.Price,
+                Rate = dto.Rate,
+                Type = dto.Type
+            };
         }
     }
 }
