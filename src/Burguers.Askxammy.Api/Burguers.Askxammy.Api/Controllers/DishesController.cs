@@ -46,7 +46,7 @@ namespace Burguers.Askxammy.Api.Controllers
 
 
         [HttpGet("id")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(long id)
         {
             if (id > 0)
             {
@@ -131,8 +131,8 @@ namespace Burguers.Askxammy.Api.Controllers
             {
                 return StatusCode(500, ex);
             }
-            
         }
+
 
         private DishDto DishToDto(Dish dish)
         {

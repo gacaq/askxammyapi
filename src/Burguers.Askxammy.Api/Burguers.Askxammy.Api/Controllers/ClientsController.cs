@@ -52,7 +52,7 @@ namespace Burguers.Askxammy.Api.Controllers
         /// <param name="id">Id de cliente solicitado</param>
         /// <returns></returns>
         [HttpGet("id")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(long id)
         {
             try
             {
@@ -138,20 +138,38 @@ namespace Burguers.Askxammy.Api.Controllers
         }
 
         [HttpGet("{id}/dishes")]
-        public IActionResult GetDishesByClient(int id)
+        public IActionResult GetDishesByClient(long id)
         {
-            if (id > 0)
+            try
             {
-                var client = unitOfWork.clients.GetById(id);
-                if (client != null)
+                if (id > 0)
                 {
-                    return Ok(client.Dish);
+                    var client = unitOfWork.clients.GetById(id);
+                    if (client != null)
+                    {
+                        var dishes = unitOfWork.dishes.Get(x => x.ClientId == id);
+                        if (dishes.Any())
+                        {
+                            var dtoList = dishes.Select(x => DishToDto(x)).ToList();
+                            return Ok(dtoList);
+                        }
+                        else
+                        {
+                            return NoContent();
+                        }
+                    }
+                    else
+                        return BadRequest("El cliente no existe");
                 }
                 else
-                    return BadRequest("El cliente solicitado no existe");
+                {
+                    return BadRequest("El id del usuario debe ser mayor a cero");
+                }
             }
-            else
-                return BadRequest("El id del restaurante debe ser mayor a 0");
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
         }
 
 
@@ -177,9 +195,23 @@ namespace Burguers.Askxammy.Api.Controllers
                 Address = client.Address,
                 Name = client.Name,
                 Username = client.Username,
-                Password = client.Password,
+                Password = "*********",
                 PhoneNumber = client.PhoneNumber,
                 Role = client.Role
+            };
+        }
+
+        private DishDto DishToDto(Dish dish)
+        {
+            return new DishDto()
+            {
+                Id = dish.Id,
+                ClientId = dish.ClientId,
+                Description = dish.Description,
+                Name = dish.Name,
+                Price = dish.Price,
+                Rate = dish.Rate,
+                Type = dish.Type
             };
         }
     }
