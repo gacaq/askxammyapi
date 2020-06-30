@@ -110,6 +110,30 @@ namespace Burguers.Askxammy.Api.Controllers
             }
         }
 
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    _unitOfWork.dishes.Delete(id);
+                    _unitOfWork.Save();
+
+                    return Ok("Plato eliminado");
+                }
+                else
+                {
+                    return BadRequest("Id de usuario invalido");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
+            }
+            
+        }
+
         private DishDto DishToDto(Dish dish)
         {
             return new DishDto()
