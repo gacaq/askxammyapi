@@ -15,15 +15,7 @@ namespace Burguers.Askxammy.Api.Controllers
     [ApiController]
     public class DishesController : ControllerBase
     {
-        private AskxammyContext _context;
-        private IUnitOfWork _unitOfWork;
-
-        public DishesController(AskxammyContext context, IUnitOfWork unitOfWork)
-        {
-            this._context = context;
-            this._unitOfWork = unitOfWork;
-        }
-
+        private UnitOfWork _unitOfWork = new UnitOfWork(new AskxammyContext());
 
         /// <summary>
         /// Obtiene la lista de todos los platos disponibles

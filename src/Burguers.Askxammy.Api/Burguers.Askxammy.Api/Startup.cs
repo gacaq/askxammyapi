@@ -23,24 +23,9 @@ namespace Burguers.Askxammy.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<ApiSettings>(Configuration);
-            services.AddDbContext<AskxammyContext>(options => options.UseSqlServer(Configuration.GetValue<string>("ConnectionString")));
-
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddControllers();
-
-            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
-            {
-                builder.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            }));
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo {  Title = "Askxammy API description", Version = "v1" });
-                c.IncludeXmlComments(@"bin\Burguers.Askxammy.Api.xml");
-            });
+            services.AddDbContext<AskxammyContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("AskXammyDb")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,17 +35,6 @@ namespace Burguers.Askxammy.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseSwagger();
-
-            //Enable middleware to serve swagger - ui(HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vehicles api for predrive Checklist V1");
-                c.RoutePrefix = "swagger";
-            });
-
-            app.UseCors("MyPolicy");
 
             app.UseHttpsRedirection();
 

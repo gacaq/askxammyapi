@@ -15,14 +15,8 @@ namespace Burguers.Askxammy.Api.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private AskxammyContext _context;
-        private IUnitOfWork _unitOfWork;
 
-        public ClientsController(AskxammyContext context, IUnitOfWork unitOfWork)
-        {
-            this._context = context;
-            this._unitOfWork = unitOfWork;
-        }
+        private UnitOfWork unitOfWork = new UnitOfWork(new AskxammyContext());
 
         /// <summary>
         /// Metodo que obtiene la lista de clientes
@@ -33,7 +27,7 @@ namespace Burguers.Askxammy.Api.Controllers
         {
             try
             {
-                var clients = this._unitOfWork.clients.Get();
+                var clients = this.unitOfWork.clients.Get();
 
                 if (clients.Any())
                 {
@@ -47,7 +41,7 @@ namespace Burguers.Askxammy.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return BadRequest(ex);
             }
         }
 
@@ -63,7 +57,7 @@ namespace Burguers.Askxammy.Api.Controllers
             try
             {
 
-                var client = this._unitOfWork.clients.GetById(id);
+                var client = this.unitOfWork.clients.GetById(id);
 
                 if (client != null)
                 {
@@ -88,8 +82,8 @@ namespace Burguers.Askxammy.Api.Controllers
                 if (ModelState.IsValid)
                 {
                     var client = DtoToClient(dto);
-                    _unitOfWork.clients.Update(client);
-                    _unitOfWork.Save();
+                    unitOfWork.clients.Update(client);
+                    unitOfWork.Save();
                     return Ok();
                 }
                 else
@@ -111,8 +105,8 @@ namespace Burguers.Askxammy.Api.Controllers
                 if (ModelState.IsValid)
                 {
                     var client = DtoToClient(dto);
-                    _unitOfWork.clients.Insert(client);
-                    _unitOfWork.Save();
+                    unitOfWork.clients.Insert(client);
+                    unitOfWork.Save();
                     return Created("AskxammiApi/SaveDish", client);
                 }
                 else
@@ -132,8 +126,8 @@ namespace Burguers.Askxammy.Api.Controllers
         {
             if (id > 0)
             {
-                _unitOfWork.clients.Delete(id);
-                _unitOfWork.Save();
+                unitOfWork.clients.Delete(id);
+                unitOfWork.Save();
 
                 return Ok("Usuario eliminado");
             }
@@ -148,7 +142,7 @@ namespace Burguers.Askxammy.Api.Controllers
         {
             if (id > 0)
             {
-                var client = _unitOfWork.clients.GetById(id);
+                var client = unitOfWork.clients.GetById(id);
                 if (client != null)
                 {
                     return Ok(client.Dish);
