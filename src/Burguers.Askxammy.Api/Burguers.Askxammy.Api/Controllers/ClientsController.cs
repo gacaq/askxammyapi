@@ -122,18 +122,25 @@ namespace Burguers.Askxammy.Api.Controllers
         }
 
         [HttpDelete("id")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(long id)
         {
-            if (id > 0)
+            try
             {
-                unitOfWork.clients.Delete(id);
-                unitOfWork.Save();
+                if (id > 0)
+                {
+                    unitOfWork.clients.Delete(id);
+                    unitOfWork.Save();
 
-                return Ok("Usuario eliminado");
+                    return Ok("Usuario eliminado");
+                }
+                else
+                {
+                    return BadRequest("Id de usuario invalido");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest("Id de usuario invalido");
+                return StatusCode(500, ex);
             }
         }
 

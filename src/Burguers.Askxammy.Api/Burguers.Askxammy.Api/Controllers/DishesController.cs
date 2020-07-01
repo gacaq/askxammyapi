@@ -111,7 +111,7 @@ namespace Burguers.Askxammy.Api.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(long id)
         {
             try
             {
